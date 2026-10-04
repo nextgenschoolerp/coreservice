@@ -11,9 +11,23 @@ import java.util.Optional;
  */
 public class SpringSecurityAuditorAware implements AuditorAware<String> {
 
+    public static final String DEFAULT_SYSTEM_AUDITOR = "system";
+
+    private final String defaultAuditor;
+
+    public SpringSecurityAuditorAware() {
+        this(DEFAULT_SYSTEM_AUDITOR);
+    }
+
+    public SpringSecurityAuditorAware(String defaultAuditor) {
+        this.defaultAuditor = defaultAuditor;
+    }
+
     @Override
     @NonNull
     public Optional<String> getCurrentAuditor() {
-        return SecurityUtils.getCurrentUserEmail();
+        return SecurityUtils.getCurrentUserEmail()
+                .or(() -> Optional.ofNullable(defaultAuditor));
     }
 }
+
