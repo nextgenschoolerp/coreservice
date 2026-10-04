@@ -1,0 +1,71 @@
+HELP.md
+
+### Build & Dependency Directories ###
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+out/
+bin/
+
+### Logs & Runtime ###
+*.log
+logs/
+*.pid
+*.seed
+*.pid.lock
+
+### Local Environment & Secrets ###
+*.env
+*.env.*
+application-local.properties
+application-local.yml
+application-local.yaml
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+### STS / Eclipse ###
+.apt_generated
+.apt_generated_tests
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### OS Generated Files ###
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+### Crash Logs ###
+hs_err_pid*
+replay_pid*
