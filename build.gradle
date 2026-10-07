@@ -62,6 +62,16 @@ subprojects {
         publications {
             gpr(MavenPublication) {
                 from components.java
+                pom {
+                    name = project.name
+                    description = 'Core Service Framework Submodule'
+                    url = 'https://github.com/knowvasystems/coreservice'
+                    scm {
+                        connection = 'scm:git:git://github.com/knowvasystems/coreservice.git'
+                        developerConnection = 'scm:git:ssh://github.com:knowvasystems/coreservice.git'
+                        url = 'https://github.com/knowvasystems/coreservice'
+                    }
+                }
                 versionMapping {
                     usage('java-api') {
                         fromResolutionOf('runtimeClasspath')
@@ -75,7 +85,7 @@ subprojects {
         repositories {
             maven {
                 name = "GitHubPackages"
-                url = uri(System.getenv("GPR_REPO_URL") ?: "https://maven.pkg.github.com/knowvasystems/packages")
+                url = uri(System.getenv("GPR_REPO_URL") ?: "https://maven.pkg.github.com/knowvasystems/nexus")
                 credentials {
                     username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
                     password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
