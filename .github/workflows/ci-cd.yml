@@ -20,8 +20,8 @@ permissions:
   packages: write
 
 jobs:
-  test:
-    name: Build & Test
+  build:
+    name: Compile & Assemble
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -37,6 +37,29 @@ jobs:
 
       - name: Validate Gradle Wrapper
         uses: gradle/actions/wrapper-validation@v4
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make Gradle Wrapper Executable
+        run: chmod +x ./gradlew
+
+      - name: Compile and Assemble JARs
+        run: ./gradlew assemble --no-daemon
+
+  test:
+    name: Run Test Suites & Coverage
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -63,7 +86,7 @@ jobs:
 
   publish:
     name: Publish Maven Packages
-    needs: test
+    needs: [build, test]
     if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     steps:
@@ -88,3 +111,75 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
           GPR_REPO_URL: "https://maven.pkg.github.com/${{ github.repository }}"
         run: ./gradlew publish --no-daemon
+
+  notify-failure:
+    name: Notify Failure via Email
+    needs: [build, test, publish]
+    if: always() && contains(needs.*.result, 'failure')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Get Last Committer Info
+        id: committer
+        run: |
+          COMMITTER_EMAIL="${{ github.event.head_commit.author.email }}"
+          COMMITTER_NAME="${{ github.event.head_commit.author.name }}"
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          
+          if [ -z "$COMMITTER_EMAIL" ]; then
+            COMMITTER_EMAIL=$(git log -1 --pretty=format:'%ae')
+          fi
+          if [ -z "$COMMITTER_NAME" ]; then
+            COMMITTER_NAME=$(git log -1 --pretty=format:'%an')
+          fi
+          if [ -z "$COMMIT_MSG" ]; then
+            COMMIT_MSG=$(git log -1 --pretty=format:'%s')
+          fi
+          
+          echo "email=$COMMITTER_EMAIL" >> $GITHUB_OUTPUT
+          echo "name=$COMMITTER_NAME" >> $GITHUB_OUTPUT
+          echo "message=$COMMIT_MSG" >> $GITHUB_OUTPUT
+
+      - name: Send Failure Notification Email
+        if: env.SMTP_SERVER != '' && steps.committer.outputs.email != ''
+        uses: dawidd6/action-send-mail@v3
+        env:
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT || 587 }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "🚨 [CI/CD FAILED] ${{ github.repository }} (${{ github.ref_name }})"
+          to: ${{ steps.committer.outputs.email }}
+          from: ${{ secrets.SMTP_USERNAME }}
+          body: |
+            CI/CD Pipeline Failure Notification
+
+            Repository: ${{ github.repository }}
+            Branch:     ${{ github.ref_name }}
+            Workflow:   ${{ github.workflow }}
+            Run Number: #${{ github.run_number }}
+
+            Committer:  ${{ steps.committer.outputs.name }} <${{ steps.committer.outputs.email }}>
+            Commit SHA: ${{ github.sha }}
+            Message:    ${{ steps.committer.outputs.message }}
+
+            Stage Statuses:
+            - Build:   ${{ needs.build.result }}
+            - Test:    ${{ needs.test.result }}
+            - Publish: ${{ needs.publish.result }}
+
+            View detailed run log:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: Fallback Notification Info
+        if: env.SMTP_SERVER == ''
+        env:
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+        run: |
+          echo "::warning title=SMTP Not Configured::SMTP_SERVER secret is not configured. Failure notification email was skipped."
+          echo "To enable failure email alerts to committers, configure secrets: SMTP_SERVER, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD."
+          echo "Target Committer: ${{ steps.committer.outputs.name }} <${{ steps.committer.outputs.email }}>"
