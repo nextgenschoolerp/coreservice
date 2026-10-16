@@ -5,6 +5,7 @@ import com.kvs.core.config.audit.SpringSecurityAuditorAware;
 import com.kvs.core.config.security.JwtAuthenticationEntryPoint;
 import com.kvs.core.config.tracing.TracePropagationClientInterceptor;
 import com.kvs.core.exception.GlobalExceptionHandler;
+import com.kvs.core.logging.RequestAndRepositoryLoggingAspect;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -36,6 +37,13 @@ public class CoreCommonAutoConfiguration {
     @ConditionalOnMissingBean(TracePropagationClientInterceptor.class)
     public TracePropagationClientInterceptor tracePropagationClientInterceptor() {
         return new TracePropagationClientInterceptor();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    public RequestAndRepositoryLoggingAspect requestAndRepositoryLoggingAspect(ObjectMapper objectMapper) {
+        return new RequestAndRepositoryLoggingAspect(objectMapper);
     }
 
     @Configuration(proxyBeanMethods = false)

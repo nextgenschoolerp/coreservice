@@ -1,3 +1,7 @@
 spring:
   application:
     name: 'coreservice'
+
+logging:
+  level:
+    com.kvs.core.logging: DEBUG
