@@ -66,7 +66,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BaseApiException.class)
     public ResponseEntity<ApiErrorResponse> handleBaseApiException(
             BaseApiException ex, HttpServletRequest request, HttpServletResponse response) {
-        log.warn("Domain exception occurred: status={}, code={}, message='{}'",
+        log.error("Domain exception occurred: status={}, code={}, message='{}'",
                 ex.getHttpStatus(), ex.getErrorCode(), ex.getMessage());
 
         String traceId = resolveAndSyncTraceId(request, response);
