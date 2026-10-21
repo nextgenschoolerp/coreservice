@@ -100,7 +100,7 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven {
-        url = uri("https://maven.pkg.github.com/nirajjaysw/knowvasystems")
+        url = uri("https://maven.pkg.github.com/nirajjaysw/nextgenschoolerp")
         credentials {
             username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
             password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")

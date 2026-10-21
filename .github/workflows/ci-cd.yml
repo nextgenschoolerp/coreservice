@@ -72,7 +72,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
-          GPR_REPO_URL: "https://maven.pkg.github.com/knowvasystems/nexus"
+          GPR_REPO_URL: "https://maven.pkg.github.com/nextgenschoolerp/nexus"
         run: ./gradlew publish --no-daemon
 
       # ── Stage 4: Failure Notification ─────────────────────
