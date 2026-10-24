@@ -1,1 +1,2 @@
 com.kvs.core.config.CoreCommonAutoConfiguration
+com.kvs.core.notification.NotificationAutoConfiguration
