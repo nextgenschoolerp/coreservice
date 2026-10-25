@@ -15,7 +15,7 @@
     <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
     <springProperty name="SERVICE_NAME" source="spring.application.name" defaultValue="unknown-service"/>
-    <property name="LOG_ROOT" value="${LOG_PATH:-../logs}"/>
+    <springProperty name="LOG_ROOT" source="logging.file.path" defaultValue="../logs"/>
     <property name="SERVICE_LOG_DIR" value="${LOG_ROOT}/${SERVICE_NAME}"/>
 
     <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
